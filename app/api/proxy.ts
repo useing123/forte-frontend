@@ -40,19 +40,28 @@ export async function proxyRequest(
             credentials: 'include', // Important for backend session handling
         })
 
-        // Get response data
-        const data = await response.text()
+        // Handle redirects
+        if (response.status >= 300 && response.status < 400 && response.headers.has('location')) {
+            const location = response.headers.get('location')!
+            const nextResponse = NextResponse.redirect(location, response.status)
 
-        // Create Next.js response with same status and headers
+            // Forward set-cookie header on redirect
+            const setCookie = response.headers.get('set-cookie')
+            if (setCookie) {
+                nextResponse.headers.set('set-cookie', setCookie)
+            }
+            return nextResponse
+        }
+
+        // Handle regular responses
+        const data = await response.text()
         const nextResponse = new NextResponse(data, {
             status: response.status,
             statusText: response.statusText,
         })
 
         // Forward important headers from backend to client
-        // Note: set-cookie can have multiple values, we need to handle them properly
         const headersToForward = ['content-type', 'cache-control', 'etag']
-
         headersToForward.forEach(headerName => {
             const value = response.headers.get(headerName)
             if (value) {
@@ -60,8 +69,7 @@ export async function proxyRequest(
             }
         })
 
-        // Handle set-cookie headers (can be multiple)
-        // In fetch API, multiple set-cookie headers are concatenated
+        // Handle set-cookie headers
         const setCookie = response.headers.get('set-cookie')
         if (setCookie) {
             nextResponse.headers.set('set-cookie', setCookie)
