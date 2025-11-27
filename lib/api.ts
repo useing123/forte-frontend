@@ -84,10 +84,8 @@ async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T>
 
     if (!res.ok) {
         if (res.status === 401) {
-            // Redirect to /auth/login (rewrite handles backend redirect for OAuth)
-            if (typeof window !== 'undefined') {
-                window.location.href = '/auth/login'
-            }
+            // Don't auto-redirect - let calling code handle it
+            // This prevents infinite redirect loops
             throw new APIError(401, 'Unauthorized')
         }
         const error = await res.json().catch(() => ({ error: 'Unknown error' }))

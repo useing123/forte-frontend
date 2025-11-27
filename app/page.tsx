@@ -104,14 +104,14 @@ export default function Home() {
             </p>
           </div>
 
-          <a href={`${API_URL}/auth/login`}>
+          <Link href="/auth/login">
             <Button size="lg" className="w-full gap-2">
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="m23.6 9.593-.033-.086L20.3.98a.851.851 0 0 0-.336-.405.87.87 0 0 0-.52-.144.87.87 0 0 0-.52.152.86.86 0 0 0-.324.413l-2.205 6.748H7.605L5.4.997a.86.86 0 0 0-.324-.413.87.87 0 0 0-.52-.152.87.87 0 0 0-.52.144.85.85 0 0 0-.337.405L.433 9.507l-.032.086a6.066 6.066 0 0 0 2.012 7.01l.01.009.027.02 4.987 3.737 2.467 1.868 1.503 1.136a1.01 1.01 0 0 0 1.22 0l1.503-1.136 2.467-1.868 5.014-3.756.012-.01a6.07 6.07 0 0 0 2.009-7.01" />
               </svg>
               Sign in with GitLab
             </Button>
-          </a>
+          </Link>
 
           <p className="text-xs text-muted-foreground">
             By signing in, you'll connect your GitLab account to enable automated code reviews
