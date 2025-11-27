@@ -1,6 +1,6 @@
 // API client for backend communication
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''
 const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 class APIError extends Error {

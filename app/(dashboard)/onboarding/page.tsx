@@ -54,9 +54,7 @@ export default function OnboardingPage() {
                 title: "Success",
                 description: "Token added successfully",
             })
-            setToken("")
-            setTokenName("")
-            loadTokens()
+            router.push("/repositories?sync=true")
         } catch (error) {
             console.error('Failed to submit token:', error)
             toast({
@@ -64,8 +62,7 @@ export default function OnboardingPage() {
                 description: "Please verify your token and try again",
                 variant: "destructive",
             })
-        } finally {
-            setLoading(false)
+            setLoading(false) // Only stop loading on error, as success redirects
         }
     }
 
@@ -88,7 +85,7 @@ export default function OnboardingPage() {
     }
 
     const handleContinue = () => {
-        router.push("/dashboard")
+        router.push("/repositories")
     }
 
     const copyToClipboard = (text: string, label: string) => {
@@ -348,7 +345,7 @@ export default function OnboardingPage() {
                                             className="w-full"
                                             onClick={handleContinue}
                                         >
-                                            Continue to Dashboard
+                                            Continue to Repositories
                                             <ArrowRight className="ml-2 h-4 w-4" />
                                         </Button>
                                     </div>

@@ -6,6 +6,18 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://forte-hackathon-core-forte-hackathon-shoe.fin1.bult.app/api/:path*',
+      },
+      {
+        source: '/auth/:path*',
+        destination: 'https://forte-hackathon-core-forte-hackathon-shoe.fin1.bult.app/auth/:path*',
+      },
+    ]
+  },
 }
 
 export default nextConfig

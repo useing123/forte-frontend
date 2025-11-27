@@ -5,10 +5,12 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, RefreshCw } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Plus, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, RefreshCw, Bot } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { api, type Repository } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import { useRef } from "react"
 
 export default function RepositoriesPage() {
   const [repositories, setRepositories] = useState<Repository[]>([])
@@ -19,10 +21,23 @@ export default function RepositoriesPage() {
   const [rowsPerPage, setRowsPerPage] = useState("10")
   const [totalPages, setTotalPages] = useState(1)
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const didAutoSync = useRef(false)
 
   useEffect(() => {
-    loadRepositories()
-  }, [searchQuery, currentPage, rowsPerPage])
+    const shouldSync = searchParams.get('sync') === 'true'
+
+    if (shouldSync && !didAutoSync.current) {
+      didAutoSync.current = true
+      handleSync().then(() => {
+        // Remove the sync param from URL without refreshing
+        router.replace('/repositories')
+      })
+    } else if (!shouldSync) {
+      loadRepositories()
+    }
+  }, [searchQuery, currentPage, rowsPerPage, searchParams])
 
   async function loadRepositories() {
     setLoading(true)
@@ -92,14 +107,20 @@ export default function RepositoriesPage() {
           <h1 className="text-2xl font-semibold text-foreground">Repositories</h1>
           <p className="text-sm text-muted-foreground">List of repositories from your GitLab account.</p>
         </div>
-        <Button
-          onClick={handleSync}
-          disabled={syncing}
-          className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
-          {syncing ? 'Syncing...' : 'Sync from GitLab'}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="gap-1.5 py-1.5 px-3 text-green-600 border-green-200 bg-green-50/50">
+            <Bot className="h-3.5 w-3.5" />
+            Bot Active
+          </Badge>
+          <Button
+            onClick={handleSync}
+            disabled={syncing}
+            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync from GitLab'}
+          </Button>
+        </div>
       </div>
 
       {/* Search */}

@@ -28,13 +28,13 @@ import { Button } from "@/components/ui/button"
 const mainNavItems = [
   { name: "Repositories", href: "/repositories", icon: GitBranch },
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Integrations", href: "/integrations", icon: Plug },
-  { name: "Reports", href: "/reports", icon: FileText },
+  // { name: "Integrations", href: "/integrations", icon: Plug },
+  // { name: "Reports", href: "/reports", icon: FileText },
 ]
 
 const settingsNavItems = [
   { name: "Configuration", href: "/settings/configuration" },
-  { name: "API Keys", href: "/settings/api-keys" },
+  // { name: "API Keys", href: "/settings/api-keys" },
 ]
 
 interface SidebarProps {
