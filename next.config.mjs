@@ -8,8 +8,12 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // All API and auth requests are now proxied through app/api/[...path]/route.ts
-      // This ensures consistent cookie and session handling.
+      {
+        source: '/auth/:path*',
+        destination: 'https://forte-hackathon-core-forte-hackathon-shoe.fin1.bult.app/auth/:path*',
+      },
+      // Removed /api/* rewrite - API requests now go through Next.js API routes
+      // which properly handle cookies and session management
     ]
   },
 }
