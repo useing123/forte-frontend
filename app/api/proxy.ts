@@ -42,7 +42,7 @@ export async function proxyRequest(
 
         // Forward important headers from backend to client
         // Note: set-cookie can have multiple values, we need to handle them properly
-        const headersToForward = ['content-type', 'cache-control', 'etag']
+        const headersToForward = ['content-type', 'cache-control', 'etag', 'location']
 
         headersToForward.forEach(headerName => {
             const value = response.headers.get(headerName)
