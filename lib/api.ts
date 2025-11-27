@@ -1,6 +1,8 @@
 // API client for backend communication
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''
+// In production, use Next.js API routes (proxy to backend)
+// In dev mode with DEV_MODE=true, use mock data
+const API_BASE_URL = '' // Empty string = use relative paths to Next.js API routes
 const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 class APIError extends Error {
@@ -67,10 +69,9 @@ async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T>
         return {} as T
     }
 
-    // Production mode: call actual backend
+    // Production mode: call Next.js API routes (which proxy to backend)
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
-        credentials: 'include', // Important: sends cookies for session
         headers: {
             'Content-Type': 'application/json',
             ...options?.headers,
@@ -79,9 +80,9 @@ async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T>
 
     if (!res.ok) {
         if (res.status === 401) {
-            // Redirect to backend login
+            // Redirect to backend login via our proxy
             if (typeof window !== 'undefined') {
-                window.location.href = `${API_BASE_URL}/auth/login`
+                window.location.href = `/api/auth/login`
             }
             throw new APIError(401, 'Unauthorized')
         }
