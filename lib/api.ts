@@ -1,9 +1,5 @@
 // API client for backend communication
-
-// In production, use Next.js API routes (proxy to backend)
-// In dev mode with DEV_MODE=true, use mock data
 const API_BASE_URL = '' // Empty string = use relative paths to Next.js API routes
-const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
 class APIError extends Error {
     constructor(public status: number, message: string) {
@@ -12,64 +8,8 @@ class APIError extends Error {
     }
 }
 
-// Mock data for development mode
-const mockData = {
-    user: { id: '1', username: 'developer', email: 'dev@example.com', name: 'Dev User', avatar_url: '' },
-    onboardingStatus: { completed: false, has_tokens: false }, // NEW: for onboarding check
-    repositories: {
-        data: [
-            { id: '1', gitlab_repo_id: 1, name: 'frontend-app', full_path: 'dev/frontend-app', visibility: 'private', description: 'Main frontend', last_review_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-            { id: '2', gitlab_repo_id: 2, name: 'backend-api', full_path: 'dev/backend-api', visibility: 'private', description: 'Backend API', last_review_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-            { id: '3', gitlab_repo_id: 3, name: 'mobile-app', full_path: 'dev/mobile-app', visibility: 'public', description: 'Mobile app', last_review_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-        ]
-    },
-    metrics: {
-        prsReviewed: { total: 158, incremental: 23 },
-        suggestions: { reviewComments: 342, accepted: 186 },
-        learnings: { used: 47, created: 12 }
-    },
-    leaderboard: {
-        data: [
-            { rank: 1, user: { id: '1', name: 'Alice Chen', avatar_url: '' }, prs_reviewed: 47, suggestions_accepted: 23 },
-            { rank: 2, user: { id: '2', name: 'Bob Smith', avatar_url: '' }, prs_reviewed: 38, suggestions_accepted: 19 },
-            { rank: 3, user: { id: '3', name: 'Carol Davis', avatar_url: '' }, prs_reviewed: 31, suggestions_accepted: 15 },
-        ]
-    },
-    apiKeys: {
-        data: [
-            { id: '1', key_name: 'Production Key', key_prefix: 'rva_prod_', created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), last_used_at: new Date().toISOString() },
-            { id: '2', key_name: 'Development Key', key_prefix: 'rva_dev_', created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-        ]
-    }
-}
-
 async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    // Development mode: return mock data
-    if (DEV_MODE) {
-        console.log(`[DEV MODE] Mock API call: ${endpoint}`)
-        await new Promise(resolve => setTimeout(resolve, 500)) // Simulate network delay
-
-        if (endpoint === '/auth/me') return mockData.user as T
-        if (endpoint === '/api/onboarding/status') return mockData.onboardingStatus as T
-        if (endpoint === '/api/onboarding/token' && options?.method === 'POST') {
-            // Mark onboarding as completed after token submission
-            mockData.onboardingStatus.completed = true
-            mockData.onboardingStatus.has_tokens = true
-            return { success: true, message: 'Token added successfully' } as T
-        }
-        if (endpoint.startsWith('/api/repositories')) return mockData.repositories as T
-        if (endpoint.startsWith('/api/dashboard/metrics')) return mockData.metrics as T
-        if (endpoint.startsWith('/api/dashboard/leaderboard')) return mockData.leaderboard as T
-        if (endpoint === '/api/api-keys' && options?.method !== 'POST') return mockData.apiKeys as T
-        if (endpoint.startsWith('/api/api-keys') && options?.method === 'POST') {
-            return { id: Date.now().toString(), key_name: 'New Key', key: 'rva_new_abc123xyz456', key_prefix: 'rva_new_', created_at: new Date().toISOString() } as T
-        }
-        if (endpoint.startsWith('/api/repositories/sync')) return { synced: 3 } as T
-
-        return {} as T
-    }
-
-    // Production mode: Use rewrites for both /auth and /api endpoints
+    // Use rewrites for both /auth and /api endpoints
     // Credentials are sent with all requests for session cookie handling
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,

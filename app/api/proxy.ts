@@ -16,11 +16,20 @@ export async function proxyRequest(
 
         // Forward cookies from the incoming request
         const cookies = request.headers.get('cookie') || ''
+        const authorization = request.headers.get('authorization')
 
         // Merge headers
-        const headers: HeadersInit = {
+        const baseHeaders: Record<string, string> = {
             'Content-Type': 'application/json',
             'Cookie': cookies,
+        }
+
+        if (authorization) {
+            baseHeaders['Authorization'] = authorization
+        }
+
+        const headers: HeadersInit = {
+            ...baseHeaders,
             ...options.headers,
         }
 
