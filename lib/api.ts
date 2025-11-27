@@ -70,8 +70,12 @@ async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T>
     }
 
     // Production mode: call Next.js API routes (which proxy to backend)
+    // Exception: /auth endpoints use rewrites and need credentials from browser
+    const isAuthEndpoint = endpoint.startsWith('/auth')
+
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
+        credentials: isAuthEndpoint ? 'include' : undefined, // Auth needs cookies from browser
         headers: {
             'Content-Type': 'application/json',
             ...options?.headers,
