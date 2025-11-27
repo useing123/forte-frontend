@@ -40,17 +40,22 @@ export async function proxyRequest(
             statusText: response.statusText,
         })
 
-        // Forward set-cookie headers from backend to client
-        response.headers.forEach((value, key) => {
-            if (key.toLowerCase() === 'set-cookie') {
-                nextResponse.headers.set(key, value)
+        // Forward important headers from backend to client
+        // Note: set-cookie can have multiple values, we need to handle them properly
+        const headersToForward = ['content-type', 'cache-control', 'etag']
+
+        headersToForward.forEach(headerName => {
+            const value = response.headers.get(headerName)
+            if (value) {
+                nextResponse.headers.set(headerName, value)
             }
         })
 
-        // Set content type
-        const contentType = response.headers.get('content-type')
-        if (contentType) {
-            nextResponse.headers.set('content-type', contentType)
+        // Handle set-cookie headers (can be multiple)
+        // In fetch API, multiple set-cookie headers are concatenated
+        const setCookie = response.headers.get('set-cookie')
+        if (setCookie) {
+            nextResponse.headers.set('set-cookie', setCookie)
         }
 
         return nextResponse
