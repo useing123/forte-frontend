@@ -14,22 +14,45 @@ export async function proxyRequest(
     try {
         const url = `${BACKEND_URL}${endpoint}${request.nextUrl.search}`
 
-        // Forward cookies from the incoming request
+        // Forward relevant headers from the incoming request to make the proxy transparent
         const cookies = request.headers.get('cookie') || ''
         const authorization = request.headers.get('authorization')
+        const userAgent = request.headers.get('user-agent') || ''
+        const accept = request.headers.get('accept') || '*/*'
+        const acceptLanguage = request.headers.get('accept-language') || 'en-US,en;q=0.9'
+        const acceptEncoding = request.headers.get('accept-encoding') || 'gzip, deflate, br'
 
-        // Merge headers
-        const baseHeaders: Record<string, string> = {
-            'Content-Type': 'application/json',
+        // Get original client IP
+        const xForwardedFor = request.headers.get('x-forwarded-for')
+        const clientIp = xForwardedFor ? xForwardedFor.split(',')[0].trim() : null
+
+        // Build headers for the backend request
+        const backendHeaders: Record<string, string> = {
             'Cookie': cookies,
+            'User-Agent': userAgent,
+            'Accept': accept,
+            'Accept-Language': acceptLanguage,
+            'Accept-Encoding': acceptEncoding,
+            'Referer': request.url,
+        }
+
+        if (clientIp) {
+            backendHeaders['X-Forwarded-For'] = clientIp
+            backendHeaders['X-Real-IP'] = clientIp
         }
 
         if (authorization) {
-            baseHeaders['Authorization'] = authorization
+            backendHeaders['Authorization'] = authorization
+        }
+
+        const method = options.method || 'GET'
+        // Only add Content-Type for methods that typically have a body
+        if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
+            backendHeaders['Content-Type'] = 'application/json'
         }
 
         const headers: HeadersInit = {
-            ...baseHeaders,
+            ...backendHeaders,
             ...options.headers,
         }
 
@@ -37,7 +60,7 @@ export async function proxyRequest(
         const response = await fetch(url, {
             ...options,
             headers,
-            credentials: 'include', // Important for backend session handling
+            // `credentials` is not needed for server-side fetch
         })
 
         // Handle redirects
