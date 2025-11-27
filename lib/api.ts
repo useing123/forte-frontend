@@ -80,9 +80,10 @@ async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T>
 
     if (!res.ok) {
         if (res.status === 401) {
-            // Redirect to backend login via our proxy
+            // Redirect to backend login directly (OAuth flow must start from backend)
             if (typeof window !== 'undefined') {
-                window.location.href = `/api/auth/login`
+                const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://forte-hackathon-core-forte-hackathon-shoe.fin1.bult.app'
+                window.location.href = `${backendUrl}/auth/login`
             }
             throw new APIError(401, 'Unauthorized')
         }
