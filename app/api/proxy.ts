@@ -12,7 +12,7 @@ export async function proxyRequest(
     options: RequestInit = {}
 ): Promise<NextResponse> {
     try {
-        const url = `${BACKEND_URL}${endpoint}`
+        const url = `${BACKEND_URL}${endpoint}${request.nextUrl.search}`
 
         // Forward cookies from the incoming request
         const cookies = request.headers.get('cookie') || ''
