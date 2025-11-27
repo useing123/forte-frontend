@@ -12,6 +12,10 @@ const nextConfig = {
         source: '/auth/:path*',
         destination: 'https://forte-hackathon-core-forte-hackathon-shoe.fin1.bult.app/auth/:path*',
       },
+      {
+        source: '/api/:path*',
+        destination: 'https://forte-hackathon-core-forte-hackathon-shoe.fin1.bult.app/api/:path*',
+      },
     ]
   },
 }
