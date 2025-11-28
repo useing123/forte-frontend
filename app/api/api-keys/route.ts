@@ -6,7 +6,5 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    const body = await request.text()
-
     return proxyRequest(request, '/api/api-keys')
 }

@@ -43,7 +43,12 @@ const mockData = {
     }
 }
 
+import { useAuth } from "@clerk/nextjs";
+
 async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const { getToken } = useAuth();
+    const token = await getToken();
+
     // Development mode: return mock data
     if (DEV_MODE) {
         console.log(`[DEV MODE] Mock API call: ${endpoint}`)
@@ -70,12 +75,11 @@ async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T>
     }
 
     // Production mode: Use rewrites for both /auth and /api endpoints
-    // Credentials are sent with all requests for session cookie handling
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
-        credentials: 'include', // Send cookies with all requests
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
             ...options?.headers,
         },
     })
