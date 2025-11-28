@@ -57,12 +57,14 @@ export default function OnboardingPage() {
             router.push("/repositories?sync=true")
         } catch (error) {
             console.error('Failed to submit token:', error)
+            const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
             toast({
                 title: "Connection failed",
-                description: "Please verify your token and try again",
+                description: `Failed to add token: ${errorMessage}. Please verify your token and try again.`,
                 variant: "destructive",
             })
-            setLoading(false) // Only stop loading on error, as success redirects
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -325,13 +327,13 @@ export default function OnboardingPage() {
                                         </div>
                                         <div className="space-y-2 max-h-40 overflow-y-auto">
                                             {tokens.map((t) => (
-                                                <div key={t.id} className="flex items-center justify-between p-2 bg-secondary/50 rounded text-sm">
+                                                <div key={t.project_id} className="flex items-center justify-between p-2 bg-secondary/50 rounded text-sm">
                                                     <span className="font-medium truncate max-w-[180px]">{t.name}</span>
                                                     <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() => handleDeleteToken(t.id)}
+                                                        onClick={() => handleDeleteToken(t.project_id)}
                                                         className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
                                                     >
                                                         <Trash2 className="h-4 w-4" />

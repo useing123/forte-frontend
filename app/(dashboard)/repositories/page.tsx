@@ -4,11 +4,13 @@ import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Plus, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, RefreshCw, Bot } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, RefreshCw, Bot, Key, Trash2, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { api, type Repository } from "@/lib/api"
+import { api, type Repository, type Token } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { useRef } from "react"
 
@@ -25,6 +27,13 @@ export default function RepositoriesPage() {
   const router = useRouter()
   const didAutoSync = useRef(false)
 
+  // Token management state
+  const [tokens, setTokens] = useState<Token[]>([])
+  const [isTokenDialogOpen, setIsTokenDialogOpen] = useState(false)
+  const [newTokenName, setNewTokenName] = useState("")
+  const [newTokenValue, setNewTokenValue] = useState("")
+  const [isSubmittingToken, setIsSubmittingToken] = useState(false)
+
   useEffect(() => {
     const shouldSync = searchParams.get('sync') === 'true'
 
@@ -37,6 +46,7 @@ export default function RepositoriesPage() {
     } else if (!shouldSync) {
       loadRepositories()
     }
+    loadTokens()
   }, [searchQuery, currentPage, rowsPerPage, searchParams])
 
   async function loadRepositories() {
@@ -84,6 +94,74 @@ export default function RepositoriesPage() {
     }
   }
 
+  async function loadTokens() {
+    try {
+      const response = await api.getTokens()
+      setTokens(response.data)
+    } catch (error) {
+      console.error('Failed to load tokens:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load API keys.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  async function handleAddToken(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newTokenName.trim() || !newTokenValue.trim()) {
+      toast({
+        title: "Required fields missing",
+        description: "Please enter both a name and a token.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsSubmittingToken(true)
+    try {
+      await api.submitProjectToken(newTokenValue, newTokenName)
+      toast({
+        title: "Success",
+        description: "Token added successfully.",
+      })
+      setNewTokenName("")
+      setNewTokenValue("")
+      await loadTokens()
+      setIsTokenDialogOpen(false)
+      await handleSync() // Sync repos after adding a new key
+    } catch (error) {
+      console.error('Failed to submit token:', error)
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
+      toast({
+        title: "Connection failed",
+        description: `Failed to add token: ${errorMessage}. Please verify your token and try again.`,
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmittingToken(false)
+    }
+  }
+
+  async function handleDeleteToken(tokenId: string) {
+    try {
+      await api.deleteToken(tokenId)
+      toast({
+        title: "Success",
+        description: "Token deleted successfully.",
+      })
+      await loadTokens()
+    } catch (error) {
+      console.error('Failed to delete token:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete token.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const formatLastReview = (dateString?: string) => {
     if (!dateString) return 'N/A'
     const date = new Date(dateString)
@@ -108,10 +186,90 @@ export default function RepositoriesPage() {
           <p className="text-sm text-muted-foreground">List of repositories from your GitLab account.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge variant="outline" className="gap-1.5 py-1.5 px-3 text-green-600 border-green-200 bg-green-50/50">
+          {/* <Badge variant="outline" className="gap-1.5 py-1.5 px-3 text-green-600 border-green-200 bg-blue-150">
             <Bot className="h-3.5 w-3.5" />
             Bot Active
-          </Badge>
+          </Badge> */}
+          <Dialog open={isTokenDialogOpen} onOpenChange={setIsTokenDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Key className="h-4 w-4" />
+                Manage Keys
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[525px]">
+              <DialogHeader>
+                <DialogTitle>Manage GitLab Access Tokens</DialogTitle>
+                <DialogDescription>
+                  Add new tokens or remove existing ones. Changes will apply to all repositories.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <h4 className="font-medium text-sm">Connected Tokens ({tokens.length})</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                  {tokens.length > 0 ? tokens.map((t) => (
+                    <div key={t.project_id} className="flex items-center justify-between p-2 bg-secondary/50 rounded text-sm">
+                      <span className="font-medium truncate max-w-[300px]">{t.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteToken(t.project_id)}
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No tokens found.</p>
+                  )}
+                </div>
+                <form onSubmit={handleAddToken} className="space-y-4 pt-4 border-t">
+                  <h4 className="font-medium text-sm">Add New Token</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="tokenName">Token Name</Label>
+                    <Input
+                      id="tokenName"
+                      placeholder="e.g. Personal Projects"
+                      value={newTokenName}
+                      onChange={(e) => setNewTokenName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tokenValue">Access Token</Label>
+                    <Input
+                      id="tokenValue"
+                      type="password"
+                      placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
+                      value={newTokenValue}
+                      onChange={(e) => setNewTokenValue(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      type="submit"
+                      disabled={isSubmittingToken}
+                      className="gap-2"
+                    >
+                      {isSubmittingToken ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          Adding...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4" />
+                          Add Token
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button
             onClick={handleSync}
             disabled={syncing}

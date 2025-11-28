@@ -55,9 +55,9 @@ export interface RepositoriesResponse {
 }
 
 export interface Token {
-    id: string
+    id?: string
     name: string
-    project_id?: string
+    project_id: string
     scopes?: string[]
     created_at: string
     last_used_at?: string

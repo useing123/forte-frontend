@@ -17,7 +17,7 @@ function SignedInRedirect() {
         if (!status.completed || !status.has_tokens) {
           router.push("/onboarding")
         } else {
-          router.push("/dashboard")
+          router.push("/repositories")
         }
       } catch (error) {
         console.error("Failed to check onboarding:", error)
