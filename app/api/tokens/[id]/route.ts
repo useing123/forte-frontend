@@ -3,7 +3,8 @@ import { proxyRequest } from '@/lib/proxy'
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    return proxyRequest(request, `/api/tokens/${params.id}`)
+    const { id } = await params
+    return proxyRequest(request, `/api/tokens/${id}`)
 }

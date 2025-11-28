@@ -16,12 +16,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 
 const mainNavItems = [
+  { name: "Onboarding", href: "/onboarding", icon: FileCode },
   { name: "Repositories", href: "/repositories", icon: GitBranch },
 ]
 
 const footerNavItems = [
-  { name: "Docs", href: "/docs", icon: FileCode },
-  { name: "Support", href: "/support", icon: HelpCircle },
+  { name: "Docs", href: "/repositories", icon: FileCode },
+  { name: "Support", href: "/repositories", icon: HelpCircle },
 ]
 
 interface SidebarProps {
@@ -49,42 +50,6 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
         collapsed ? "w-16" : "w-60"
       )}
     >
-      {/* Main Navigation */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {mainNavItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              isActive(item.href)
-                ? "bg-sidebar-accent text-sidebar-foreground"
-                : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-            )}
-            title={collapsed ? item.name : undefined}
-          >
-            <item.icon className="h-4 w-4 shrink-0" />
-            {!collapsed && <span>{item.name}</span>}
-          </Link>
-        ))}
-      </nav>
-
-      {/* Footer Links */}
-      <div className="p-3 border-t border-sidebar-border space-y-1">
-        {footerNavItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
-            title={collapsed ? item.name : undefined}
-          >
-            <item.icon className="h-4 w-4 shrink-0" />
-            {!collapsed && <span>{item.name}</span>}
-          </Link>
-        ))}
-      </div>
-
-      {/* User Section */}
       <div className="p-3 border-t border-sidebar-border">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
           <Avatar className="h-8 w-8">
@@ -147,6 +112,43 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
           {!collapsed && <span>Collapse</span>}
         </Button>
       </div>
+      {/* Main Navigation */}
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {mainNavItems.map((item) => (
+          <Link
+            key={item.name}
+            href={item.href}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+              isActive(item.href)
+                ? "bg-sidebar-accent text-sidebar-foreground"
+                : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+            )}
+            title={collapsed ? item.name : undefined}
+          >
+            <item.icon className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>{item.name}</span>}
+          </Link>
+        ))}
+      </nav>
+
+      {/* Footer Links */}
+      <div className="p-3 border-t border-sidebar-border space-y-1">
+        {footerNavItems.map((item) => (
+          <Link
+            key={item.name}
+            href={item.href}
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+            title={collapsed ? item.name : undefined}
+          >
+            <item.icon className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>{item.name}</span>}
+          </Link>
+        ))}
+      </div>
+
+      {/* User Section */}
+
     </aside>
   )
 }

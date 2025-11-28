@@ -327,13 +327,13 @@ export default function OnboardingPage() {
                                         </div>
                                         <div className="space-y-2 max-h-40 overflow-y-auto">
                                             {tokens.map((t) => (
-                                                <div key={t.project_id} className="flex items-center justify-between p-2 bg-secondary/50 rounded text-sm">
+                                                <div key={t.id || t.project_id} className="flex items-center justify-between p-2 bg-secondary/50 rounded text-sm">
                                                     <span className="font-medium truncate max-w-[180px]">{t.name}</span>
                                                     <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() => handleDeleteToken(t.project_id)}
+                                                        onClick={() => handleDeleteToken(t.id || t.project_id)}
                                                         className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
                                                     >
                                                         <Trash2 className="h-4 w-4" />

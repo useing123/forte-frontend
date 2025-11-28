@@ -24,6 +24,10 @@ async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T>
         throw new APIError(res.status, error.error || `Request failed with status ${res.status}`)
     }
 
+    if (res.status === 204) {
+        return {} as T
+    }
+
     return res.json()
 }
 
