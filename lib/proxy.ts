@@ -14,9 +14,15 @@ export async function proxyRequest(request: NextRequest, endpoint: string) {
 
     const token = await getToken();
 
+    console.log('[PROXY DEBUG] userId:', userId);
+    console.log('[PROXY DEBUG] token exists:', !!token);
+    console.log('[PROXY DEBUG] endpoint:', endpoint);
+
     const backendUrl = process.env.API_URL || "http://localhost:8080";
     const url = new URL(`${backendUrl}${endpoint}`);
     url.search = request.nextUrl.search;
+
+    console.log('[PROXY DEBUG] calling backend:', url.toString());
 
     const headers = new Headers(request.headers);
     headers.set("Authorization", `Bearer ${token}`);
