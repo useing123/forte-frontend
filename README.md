@@ -51,10 +51,3 @@ This is the frontend part of the project. The backend can be found [here](https:
     ```
 
     Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## 📸 Screenshots
-
-*(You can add screenshots of your application here)*
-
----
-*This README was generated automatically. Feel free to modify and expand it.*
