@@ -67,8 +67,7 @@ export default function Home() {
                 today?
               </h1>
               <p className="mt-6 text-xl md:text-2xl text-white/90 max-w-2xl mx-auto text-pretty">
-                AI-powered code reviews for GitLab. Automated insights, intelligent suggestions, and continuous
-                learning.
+                Senior AI reviews in your gitlab repositories
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <SignInButton mode="modal">
@@ -76,7 +75,7 @@ export default function Home() {
                     size="lg"
                     className="bg-white text-purple-600 hover:bg-white/90 text-lg px-8 py-6 rounded-full shadow-xl shadow-purple-900/30"
                   >
-                    Start reviewing for free
+                    Start for free
                   </Button>
                 </SignInButton>
               </div>
