@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, RefreshCw, Bot, Key, Trash2, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { api, type Repository, type Token } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { useRef } from "react"
@@ -299,11 +300,12 @@ export default function RepositoriesPage() {
       {/* Table */}
       <Card className="bg-card border-border">
         <div className="border-b border-border">
-          <div className="grid grid-cols-3 px-4 py-3">
+          <div className="grid grid-cols-4 px-4 py-3">
             <button className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary">
               Repository
               <ArrowUpDown className="h-3 w-3" />
             </button>
+            <div className="text-sm font-medium text-foreground">System Status</div>
             <div className="text-sm font-medium text-foreground">Visibility</div>
             <div className="text-sm font-medium text-foreground">Last Review</div>
           </div>
@@ -313,8 +315,9 @@ export default function RepositoriesPage() {
           {loading ? (
             // Loading skeleton
             Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="grid grid-cols-3 px-4 py-3 items-center">
+              <div key={i} className="grid grid-cols-4 px-4 py-3 items-center">
                 <div className="h-4 bg-secondary rounded animate-pulse" />
+                <div className="h-6 w-24 bg-secondary rounded animate-pulse" />
                 <div className="h-6 w-20 bg-secondary rounded animate-pulse" />
                 <div className="h-4 w-24 bg-secondary rounded animate-pulse" />
               </div>
@@ -327,9 +330,25 @@ export default function RepositoriesPage() {
             filteredRepos.map((repo) => (
               <div
                 key={repo.id}
-                className="grid grid-cols-3 px-4 py-3 items-center hover:bg-secondary/50 transition-colors cursor-pointer"
+                className="grid grid-cols-4 px-4 py-3 items-center hover:bg-secondary/50 transition-colors cursor-pointer"
+                onClick={() => window.open(`https://gitlab.com/${repo.full_path}`, '_blank')}
               >
                 <span className="text-sm font-medium text-foreground">{repo.name}</span>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge variant="outline" className="gap-1.5 py-0.5 px-2 text-white border-white bg-primary/10 hover:bg-primary/20 cursor-help">
+                          <div className="h-1.5 w-1.5 rounded-full bg-blue-200 animate-pulse" />
+                          Agent Active
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Make merge request for getting reviews</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <div>
                   <Badge
                     variant="secondary"
