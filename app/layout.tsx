@@ -1,5 +1,13 @@
 import type React from "react"
 import type { Metadata } from "next"
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import { Open_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
@@ -22,11 +30,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${openSans.className} antialiased`}>
-        {children}
-        <Analytics />
-      </body>
-    </html>
-  )
+    <ClerkProvider>
+      <html lang="en" className="dark">
+        <body className={`${openSans.className} antialiased`}>
+          {children}
+          <Analytics />
+        </body>
+      </html>
+    </ClerkProvider>
+  );
 }

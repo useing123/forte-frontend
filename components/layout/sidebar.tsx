@@ -1,40 +1,29 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
+import { useUser, SignOutButton } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
-import { api } from "@/lib/api"
 import {
   LayoutDashboard,
   GitBranch,
-  Plug,
-  FileText,
-  Brain,
-  Settings,
-  CreditCard,
-  ChevronDown,
-  ChevronUp,
   FileCode,
   HelpCircle,
-  Rocket,
   Bell,
   LogOut,
   PanelLeftClose,
 } from "lucide-react"
-import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 
 const mainNavItems = [
   { name: "Repositories", href: "/repositories", icon: GitBranch },
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  // { name: "Integrations", href: "/integrations", icon: Plug },
-  // { name: "Reports", href: "/reports", icon: FileText },
 ]
 
-const settingsNavItems = [
-  { name: "Configuration", href: "/settings/configuration" },
-  // { name: "API Keys", href: "/settings/api-keys" },
+const footerNavItems = [
+  { name: "Docs", href: "/docs", icon: FileCode },
+  { name: "Support", href: "/support", icon: HelpCircle },
 ]
 
 interface SidebarProps {
@@ -44,16 +33,10 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
   const pathname = usePathname()
-  const router = useRouter()
-  const [settingsOpen, setSettingsOpen] = useState(pathname.startsWith("/settings"))
+  const { user } = useUser()
 
-  const handleLogout = async () => {
-    try {
-      await api.logout()
-      router.push("/")
-    } catch (error) {
-      console.error("Logout failed:", error)
-    }
+  if (!user) {
+    return null
   }
 
   const isActive = (href: string) => {
@@ -65,24 +48,9 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
     <aside
       className={cn(
         "flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300",
-        collapsed ? "w-16" : "w-60",
+        collapsed ? "w-16" : "w-60"
       )}
     >
-      {/* Organization Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-sidebar-border">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="/github-logo.png" />
-          <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground text-xs">GH</AvatarFallback>
-        </Avatar>
-        {!collapsed && (
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-sidebar-foreground truncate">myorg</p>
-            <p className="text-xs text-muted-foreground">Switch Organization</p>
-          </div>
-        )}
-        {!collapsed && <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-      </div>
-
       {/* Main Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {mainNavItems.map((item) => (
@@ -93,77 +61,82 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
               "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
               isActive(item.href)
                 ? "bg-sidebar-accent text-sidebar-foreground"
-                : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
             )}
+            title={collapsed ? item.name : undefined}
           >
             <item.icon className="h-4 w-4 shrink-0" />
             {!collapsed && <span>{item.name}</span>}
           </Link>
         ))}
-
       </nav>
-
 
       {/* Footer Links */}
       <div className="p-3 border-t border-sidebar-border space-y-1">
-        <Link
-          href="/docs"
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
-        >
-          <FileCode className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>Docs</span>}
-        </Link>
-        <Link
-          href="/support"
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
-        >
-          <HelpCircle className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>Support</span>}
-        </Link>
+        {footerNavItems.map((item) => (
+          <Link
+            key={item.name}
+            href={item.href}
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+            title={collapsed ? item.name : undefined}
+          >
+            <item.icon className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>{item.name}</span>}
+          </Link>
+        ))}
       </div>
 
       {/* User Section */}
       <div className="p-3 border-t border-sidebar-border">
-        <div className="flex items-center gap-3">
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/diverse-user-avatars.png" />
-            <AvatarFallback className="bg-primary/20 text-primary text-xs">U</AvatarFallback>
+            <AvatarImage src={user.imageUrl} />
+            <AvatarFallback className="bg-primary/20 text-primary text-xs">
+              {user.firstName?.charAt(0)}
+              {user.lastName?.charAt(0)}
+            </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">user123</p>
-                <p className="text-xs text-muted-foreground">Admin</p>
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                  {user.fullName}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user.primaryEmailAddress?.emailAddress}
+                </p>
               </div>
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 text-muted-foreground hover:text-sidebar-foreground"
+                  title="Notifications"
                 >
                   <Bell className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-muted-foreground hover:text-sidebar-foreground"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
+                <SignOutButton>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-sidebar-foreground"
+                    title="Sign out"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </SignOutButton>
               </div>
             </>
           )}
         </div>
-        {/* Collapse/Expand Toggle Button - Always visible */}
+
+        {/* Collapse/Expand Toggle */}
         <Button
           variant="ghost"
           onClick={() => onCollapse?.(!collapsed)}
           className={cn(
-            "mt-2 text-muted-foreground hover:text-sidebar-foreground transition-all",
-            collapsed
-              ? "w-full justify-center px-0"
-              : "w-full justify-start gap-3 px-3"
+            "mt-2 w-full text-muted-foreground hover:text-sidebar-foreground transition-all",
+            collapsed ? "justify-center px-0" : "justify-start gap-3 px-3"
           )}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
