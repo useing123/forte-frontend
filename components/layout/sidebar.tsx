@@ -11,6 +11,7 @@ import {
   Bell,
   LogOut,
   PanelLeftClose,
+  Plug,
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -18,6 +19,7 @@ import { Button } from "@/components/ui/button"
 const mainNavItems = [
   { name: "Onboarding", href: "/onboarding", icon: FileCode },
   { name: "Repositories", href: "/repositories", icon: GitBranch },
+  { name: "Integrations", href: "/integrations", icon: Plug },
 ]
 
 const footerNavItems = [
