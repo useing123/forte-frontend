@@ -3,15 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function proxyRequest(request: NextRequest, endpoint: string) {
   try {
-    const { getToken } = await auth();
-    const token = await getToken();
+    const { userId, getToken } = await auth();
 
-    if (!token) {
+    if (!userId) {
       return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    const token = await getToken();
 
     const backendUrl = process.env.API_URL || "http://localhost:8080";
     const url = new URL(`${backendUrl}${endpoint}`);
