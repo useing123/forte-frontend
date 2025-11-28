@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import { useUser, SignOutButton } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import {
-  LayoutDashboard,
   GitBranch,
   FileCode,
   HelpCircle,
@@ -18,7 +17,6 @@ import { Button } from "@/components/ui/button"
 
 const mainNavItems = [
   { name: "Repositories", href: "/repositories", icon: GitBranch },
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
 ]
 
 const footerNavItems = [
